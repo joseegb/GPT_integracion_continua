@@ -1,0 +1,36 @@
+name: CI - Integración Continua
+
+on:
+  pull_request:
+    branches: [develop, main]
+  push:
+    branches: [develop, main]
+
+permissions:
+  contents: read
+
+jobs:
+  quality-and-tests:
+    name: Lint (Ruff) y Tests (Pytest >= 80%)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Descargar código
+        uses: actions/checkout@v4
+
+      - name: Configurar Python 3.14 con caché de pip
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+          cache: "pip"
+
+      - name: Instalar dependencias
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Análisis de estilo y lint (Ruff)
+        run: ruff check .
+
+      - name: Pruebas unitarias y cobertura mínima (80%)
+        run: pytest --cov=app --cov-report=term-missing --cov-fail-under=80
